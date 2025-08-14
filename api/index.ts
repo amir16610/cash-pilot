@@ -1,44 +1,31 @@
-// Vercel serverless function wrapper for ExpenseShare API
+// api/index.ts
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import express from 'express';
-import cors from 'cors';
+import fetch from 'node-fetch';
 
-// Import your server routes - adjust path as needed
-// Note: This is a simplified version for Vercel deployment
+const REPLIT_BACKEND = "https://af3c07d4-752f-4485-9b15-c19e3145c10b-00-2yfziis2nbhf0.riker.replit.dev";
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const app = express();
-  
-  // Enable CORS for all origins in production (adjust as needed)
-  app.use(cors({
-    origin: true,
-    credentials: true,
-  }));
-  
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
-  
-  // Health check
-  app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-  });
-  
-  // Basic API routes - you'll need to implement these based on your server/routes.ts
-  app.get('/api/*', (req, res) => {
-    res.status(501).json({ 
-      error: 'Not implemented', 
-      message: 'This API endpoint needs to be implemented for Vercel deployment' 
-    });
-  });
-  
-  app.post('/api/*', (req, res) => {
-    res.status(501).json({ 
-      error: 'Not implemented', 
-      message: 'This API endpoint needs to be implemented for Vercel deployment' 
-    });
-  });
-  
-  // Handle the request
-  return new Promise((resolve) => {
-    app(req as any, res as any, resolve);
-  });
+  try {
+    // Forward the request to your Replit backend
+    const url = `${REPLIT_BACKEND}${req.url}`;
+    const options: any = {
+      method: req.method,
+      headers: {
+        ...req.headers,
+        host: undefined // remove 'host' header to avoid CORS issues
+      }
+    };
+
+    if (req.method !== 'GET' && req.body) {
+      options.body = JSON.stringify(req.body);
+      options.headers['Content-Type'] = 'application/json';
+    }
+
+    const response = await fetch(url, options);
+    const data = await response.text();
+
+    res.status(response.status).send(data);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 }
