@@ -1,5 +1,5 @@
-// Before
-const res = await fetch("http://localhost:5000/expenses");
+// ❌ Old (won't work on Vercel)
+fetch("http://localhost:5000/expenses")
 
-// After
-const res = await fetch("https://<cash pilot>.mockapi.io/expenses");
+// ✅ New (works from anywhere)
+fetch("https://af3c07d4-752f-4485-9b15-c19e3145c10b-00-2yfziis2nbhf0.riker.replit.dev/expenses")
